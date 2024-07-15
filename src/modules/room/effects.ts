@@ -5,7 +5,6 @@ import { RtpCapabilities } from "mediasoup-client/lib/RtpParameters";
 import { IPeer } from "./type";
 import { Transport } from "mediasoup-client/lib/Transport";
 import { Consumer } from "mediasoup-client/lib/Consumer";
-import { config } from "@/config";
 
 export const joinRoomEventFx = createEffect(async ({ roomId }: { roomId: string }) => {
   const data = await wsRequest<{
@@ -116,6 +115,17 @@ export const getConsumerMediaFx = createEffect(async ({ recvTransport, peers, ne
 
 export const createVideoProducerFx = createEffect(async ({ sendTransport }: { sendTransport: Transport }) => {
   const stream = await getUserMedia({ video: true })
-  const videoProducer = await sendTransport.produce({ track: stream.getVideoTracks()[0], encodings: config.encodings })
+  const videoProducer = await sendTransport.produce({ track: stream.getVideoTracks()[0] })
   return videoProducer
+})
+export const createAudioProducerFx = createEffect(async ({ sendTransport }: { sendTransport: Transport }) => {
+  const stream = await getUserMedia({ audio: true })
+  const audioProducer = await sendTransport.produce({
+    track: stream.getAudioTracks()[0], codecOptions:
+    {
+      opusStereo: true,
+      opusDtx: true
+    }
+  })
+  return audioProducer
 })

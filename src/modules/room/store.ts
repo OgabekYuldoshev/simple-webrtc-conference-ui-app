@@ -1,7 +1,7 @@
 import { createStore, sample } from "effector";
 import { IRoomStore } from "./type";
-import { addNewPeerEvent, changeMicEvent, disableWebcamEvent, enableWebcamEvent, joinRoomEvent, leavePeerEvent, newProducerEvent, setProducerEvent } from "./events";
-import { createRecvTransportFx, createSendTransportFx, createVideoProducerFx, getConsumerMediaFx, getConsumersMediaFx, joinRoomEventFx, loadRtpCapabilitiesFx } from "./effects";
+import { addNewPeerEvent, changeMicEvent, disableMicEvent, disableWebcamEvent, enableMicEvent, enableWebcamEvent, joinRoomEvent, leavePeerEvent, newProducerEvent, setProducerEvent } from "./events";
+import { createAudioProducerFx, createRecvTransportFx, createSendTransportFx, createVideoProducerFx, getConsumerMediaFx, getConsumersMediaFx, joinRoomEventFx, loadRtpCapabilitiesFx } from "./effects";
 import { Transport } from "mediasoup-client/lib/types";
 
 export const $roomStore = createStore<IRoomStore>({
@@ -57,9 +57,37 @@ $roomStore.on(createVideoProducerFx.doneData, (state, videoProducer) => ({
   }
 }))
 
+$roomStore.on(createAudioProducerFx.doneData, (state, audioProducer) => ({
+  ...state,
+  local: {
+    ...state.local,
+    isMic: true,
+  },
+  producers: {
+    ...state.producers,
+    audio: audioProducer
+  }
+}))
+
+$roomStore.on(disableMicEvent, (state) => {
+  state.producers.audio?.close()
+
+  return {
+    ...state,
+    local: {
+      ...state.local,
+      isCamera: false,
+    },
+    producers: {
+      ...state.producers,
+      audio: undefined
+    }
+  }
+})
+
 $roomStore.on(disableWebcamEvent, (state) => {
   state.producers.video?.close()
-  
+
   return {
     ...state,
     local: {
@@ -131,6 +159,13 @@ sample({
   source: $roomStore,
   fn: ({ sendTransport }) => ({ sendTransport }),
   target: createVideoProducerFx
+})
+
+sample({
+  clock: enableMicEvent,
+  source: $roomStore,
+  fn: ({ sendTransport }) => ({ sendTransport }),
+  target: createAudioProducerFx
 })
 
 sample({

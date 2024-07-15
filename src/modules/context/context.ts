@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { IRoomContextValue } from "./type";
-import { $roomStore } from "../room/store";
+import { $roomClientStore } from "../room2/store";
 
 export const RoomContext = createContext<IRoomContextValue>({
-  roomStore: $roomStore.getState()
+  roomStore: $roomClientStore.getState()
 })

@@ -13,5 +13,9 @@ export const setProducerEvent = createEvent<Producer>()
 export const enableWebcamEvent = createEvent()
 export const disableWebcamEvent = createEvent()
 
+export const enableMicEvent = createEvent()
+export const disableMicEvent = createEvent()
+
+
 export const changeMicEvent = createEvent<boolean>()
 
